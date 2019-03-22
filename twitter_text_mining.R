@@ -7,7 +7,7 @@ setwd(paste0("C:\\Users\\",Sys.info()["user"], "\\Documents\\Facebook and Twitte
 
 #Check and download required packages
 
-required_lib <- c("twitteR","ROAuth", "wordcloud2", "wordcloud", "httr", "tm", "RCurl", "stringr")
+required_lib <- c("twitteR","ROAuth", "wordcloud2", "svDialogs", "wordcloud", "httr", "tm", "RCurl", "stringr")
 
 suppressMessages({suppressWarnings({
   for(ilib in required_lib){
@@ -23,10 +23,11 @@ suppressMessages({suppressWarnings({
 #Navigate to (https://developer.twitter.com/) to set up an account and create an app.  You will allow you to create an api.
 #Navigate to Keys and Tokens. We will use these will give us permission to your account.
 
-consumer_key <- "my_consumer_key"
-consumer_secret <-"my_consumer_secret"
-access_token <- "my_access_token"
-access_token_secret <- "my_access_secret"
+#Implement with interactive inputs
+consumer_key <- dlg_input(message = "Enter Consumer Key:")$res
+consumer_secret <-dlg_input(message = "Enter Consumer Secret:")$res
+access_token <- dlg_input(message = "Enter Access Token:")$res
+access_token_secret <- dlg_input(message = "Enter Access Token Secret:")$res
 
 #Create twitter Authorization
 
