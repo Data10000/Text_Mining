@@ -90,7 +90,7 @@ View(dates_links_df)
 
 appended_minutes <- c()
 for(ival in 1:nrow(dates_links_df)){
-  write.table(read_html(dates_links_df[ival, 2])%>%html_nodes("p")%>%as.character(), file = paste0("C:/Users/johnl/Desktop/UNOPS/",dates_links_df[ival, 1], ".txt"))
+  write.table(read_html(dates_links_df[ival, 2])%>%html_nodes("p")%>%as.character(), file = paste0("C:/Users/johnl/Desktop/",dates_links_df[ival, 1], ".txt"))
   appended_minutes <-c(appended_minutes, read_html(dates_links_df[ival, 2])%>%html_nodes("p")%>%as.character())
 }
 
