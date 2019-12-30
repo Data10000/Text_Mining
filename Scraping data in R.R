@@ -1,7 +1,7 @@
 #Load required libraries
 rm(list = ls())
 
-lib_vec <- c("rvest","xml2", "stringr", "tm", "wordcloud", "wordcloud2", "ggplot2", "tidytext", "dplyr", "textdata", "sentimentr")
+lib_vec <- c("rvest","xml2", "stringr", "tm", "wordcloud", "wordcloud2", "ggplot2", "tidytext", "dplyr", "textdata", "sentimentr", "plotly")
 
 for(lib in lib_vec){
   if(!require(lib, character.only = T)){
@@ -209,6 +209,110 @@ ggplot(sent_df, aes(x = 2, y = prop, fill = sentiment)) +
   theme_void()+ggtitle("Sentiments Scores Proportions")+theme(plot.title = element_text(hjust=0.5,size = 22),axis.text.y = element_blank(), axis.ticks = element_blank(),
                                                               legend.title=element_text(size=14))+ labs(color='Item Type')+
   scale_fill_manual(values=c("darkred","darkgreen"))+ guides(fill=guide_legend(title="Score"))
+
+
+####################################### N Grams Sentiment Analysis############################################################
+
+sentiments <- sentiment(appended_minutes1)#Sentiments per sentences. It may results to duplicate sentences in case of  multiple sentences
+
+###################### I Have not done lametization as part of data preparation. I find stemming not useful in situations where complexity is involved e.g speak and spoke 
+
+#Extract zero sentiments
+
+appended_minutes_df <- data.frame(texts = appended_minutes1, element_id= unique(sentiments$element_id))
+final_sentiments_1 <- left_join(appended_minutes_df, sentiments, by= "element_id")
+
+sentiments_zero <- final_sentiments_1[final_sentiments_1$sentiment==0, ]
+View(sentiments_zero)
+
+
+#Distribution of sentiment scores
+
+h =2*IQR(final_sentiments_1$sentiment)*length(final_sentiments_1$sentiment)**(-1/3) ;h
+
+bins = round((max(final_sentiments_1$sentiment)- min(final_sentiments_1$sentiment))/h, 0);bins
+
+
+ggplotly(ggplot(data=final_sentiments_1)+geom_histogram(fill="blue",color="black", aes(x= sentiment, y=..density..), bins = bins)+geom_density(aes(x= sentiment, y=..density..), color ="red", size=1.5)+theme_light()+xlab("Sentiments")+
+  theme_minimal()+ggtitle("Sentiments Scores Distribution")+theme(plot.title = element_text(hjust=0.5,size = 22, face = "bold"), axis.title =  element_text(size = 18),  axis.text =  element_text(size = 15)))
+                                                              
+
+#Add cat column for splitting into neutral, negative, and positive
+
+final_sentiments_1[, "sentiment_score"] <- ifelse(final_sentiments_1[, "sentiment"]<0, "Negative", ifelse(final_sentiments_1[, "sentiment"]==0, "Neutral", "Positive"))
+
+#Plot positve, Neutral, and Negative
+
+#Sentimate Perceptions Pie  and Donut Plots
+scores_df1 <- as.data.frame(t(table(final_sentiments_1[, "sentiment_score"])))[2:3]
+names(scores_df1) <- c("Scores", "Frequency")
+
+score_df <- scores_df1%>%group_by(Scores)%>%summarise(score= sum(Frequency))
+
+score_df<- score_df%>% mutate(prop = (score/sum(score))*100)
+
+score_df<- score_df %>% arrange(desc(Scores)) %>%mutate(lab.ypos = cumsum(prop) - 0.6*prop)
+
+
+ggplot(score_df, aes(x = 2, y = prop, fill = Scores)) +
+  geom_bar(stat = "identity", color = "white") +
+  coord_polar(theta = "y", start = 0)+
+  geom_text(aes(y = lab.ypos, label = paste0(round(prop), "%")), color = "white")+
+  #scale_fill_manual(values = mycols) +
+  theme_void()+ggtitle("Sentiments Scores Proportions")+theme(plot.title = element_text(hjust=0.5,size = 22),axis.text.y = element_blank(), axis.ticks = element_blank(),
+                                                              legend.title=element_text(size=14))+ labs(color='Item Type')+
+  scale_fill_manual(values=c("darkred","orange","darkgreen"))+ guides(fill=guide_legend(title="Score"))
+
+
+
+
+sentiment_by = sentiment_by(appended_minutes1) #Sentiments per line/row. No duplicate rows in the ou
+
+#Extract zero sentiments
+appended_minutes_df1 <- data.frame(texts = appended_minutes1, element_id= sentiment_by$element_id)
+final_sentiments_2 <- left_join(appended_minutes_df1, sentiment_by, by= "element_id")
+
+sentiments_zero1 <- final_sentiments_2[final_sentiments_2$ave_sentiment==0, ]
+View(sentiments_zero1)
+
+
+#Distribution of sentiment scores
+h1 =2*IQR(final_sentiments_2$ave_sentiment)*length(final_sentiments_2$ave_sentiment)**(-1/3) ;h1
+
+bins1 = round((max(final_sentiments_2$ave_sentiment)- min(final_sentiments_2$ave_sentiment))/h, 0);bins1
+
+
+
+ggplotly(ggplot(data=final_sentiments_2)+geom_histogram(fill="blue",color="black", aes(x= ave_sentiment, y=..density..), bins = bins1)+geom_density(aes(x= ave_sentiment, y=..density..), color ="red", size=1.5)+theme_light()+xlab("Sentiments")+
+           theme_minimal()+ggtitle("Sentiments Scores Distribution")+theme(plot.title = element_text(hjust=0.5,size = 22, face = "bold"), axis.title =  element_text(size = 18),  axis.text =  element_text(size = 15)))
+
+
+final_sentiments_2[, "sentiment_score"] <- ifelse(final_sentiments_2[, "ave_sentiment"]<0, "Negative", ifelse(final_sentiments_2[, "ave_sentiment"]==0, "Neutral", "Positive"))
+
+#Plot positve, Neutral, and Negative
+
+#Sentimate Perceptions Pie  and Donut Plots
+scores_df1 <- as.data.frame(t(table(final_sentiments_2[, "sentiment_score"])))[2:3]
+names(scores_df1) <- c("Scores", "Frequency")
+
+score_df1 <- scores_df1%>%group_by(Scores)%>%summarise(score= sum(Frequency))
+
+score_df1<- score_df1%>% mutate(prop = (score/sum(score))*100)
+
+score_df1<- score_df1 %>% arrange(desc(Scores)) %>%mutate(lab.ypos = cumsum(prop) - 0.6*prop)
+
+
+ggplot(score_df1, aes(x = 2, y = prop, fill = Scores)) +
+  geom_bar(stat = "identity", color = "white") +
+  coord_polar(theta = "y", start = 0)+
+  geom_text(aes(y = lab.ypos, label = paste0(round(prop), "%")), color = "white")+
+  #scale_fill_manual(values = mycols) +
+  theme_void()+ggtitle("Sentiments Scores Proportions")+theme(plot.title = element_text(hjust=0.5,size = 22),axis.text.y = element_blank(), axis.ticks = element_blank(),
+                                                              legend.title=element_text(size=14))+ labs(color='Item Type')+
+  scale_fill_manual(values=c("darkred","orange","darkgreen"))+ guides(fill=guide_legend(title="Score"))
+
+
+#The two pie charts display same results regardless  of the methods used(sentiment or sentiment_by)
 
 
 
