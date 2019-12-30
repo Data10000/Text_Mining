@@ -1,7 +1,7 @@
 #Load required libraries
 rm(list = ls())
 
-lib_vec <- c("rvest","xml2", "stringr", "tm", "wordcloud", "wordcloud2", "ggplot2", "tidytext", "dplyr", "textdata")
+lib_vec <- c("rvest","xml2", "stringr", "tm", "wordcloud", "wordcloud2", "ggplot2", "tidytext", "dplyr", "textdata", "sentimentr")
 
 for(lib in lib_vec){
   if(!require(lib, character.only = T)){
@@ -110,8 +110,9 @@ minutes_cop <- Corpus(VectorSource(appended_minutes1))
 suppressWarnings({
   corp_rm_other <- tm_map(minutes_cop, removeNumbers)
   corp_rm_other1<- tm_map(corp_rm_other, removePunctuation)
-  corp_rm_other2<- tm_map(corp_rm_other1, removeWords)
+  corp_rm_other2<- tm_map(corp_rm_other1,  removeWords, stopwords("english"))
   corp_rm_other3<- tm_map(corp_rm_other2, stripWhitespace)
+  
 })
 
 
@@ -127,7 +128,7 @@ View(text_df)
 
 
 text_df_clean_st <- text_df
-text_df_clean <- text_df[!str_detect(text_df$word, pattern = "the|can|will|are|'s"), ]
+text_df_clean <- text_df[!str_detect(text_df_clean_st$word, pattern = "the|can|will|are|'s"), ]
 
 text_df_clean$word <- as.character(text_df_clean$word)
 
