@@ -233,8 +233,12 @@ h =2*IQR(final_sentiments_1$sentiment)*length(final_sentiments_1$sentiment)**(-1
 bins = round((max(final_sentiments_1$sentiment)- min(final_sentiments_1$sentiment))/h, 0);bins
 
 
+Sentiments_scores_distributions<- ggplot(data=final_sentiments_1)+geom_histogram(fill="blue",color="black", aes(x= sentiment, y=..density..), bins = bins)+geom_density(aes(x= sentiment, y=..density..), color ="red", size=1.5)+theme_light()+xlab("Sentiments")+
+  theme_minimal()+ggtitle("Sentiments Scores Distribution")+theme(plot.title = element_text(hjust=0.5,size = 22, face = "bold"), axis.title =  element_text(size = 18),  axis.text =  element_text(size = 15), axis.text.y =element_blank())
+
+
 ggplotly(ggplot(data=final_sentiments_1)+geom_histogram(fill="blue",color="black", aes(x= sentiment, y=..density..), bins = bins)+geom_density(aes(x= sentiment, y=..density..), color ="red", size=1.5)+theme_light()+xlab("Sentiments")+
-  theme_minimal()+ggtitle("Sentiments Scores Distribution")+theme(plot.title = element_text(hjust=0.5,size = 22, face = "bold"), axis.title =  element_text(size = 18),  axis.text =  element_text(size = 15)))
+           theme_minimal()+ggtitle("Sentiments Scores Distribution")+theme(plot.title = element_text(hjust=0.5,size = 22, face = "bold"), axis.title =  element_text(size = 18),  axis.text =  element_text(size = 15)))
                                                               
 
 #Add cat column for splitting into neutral, negative, and positive
@@ -302,7 +306,7 @@ score_df1<- score_df1%>% mutate(prop = (score/sum(score))*100)
 score_df1<- score_df1 %>% arrange(desc(Scores)) %>%mutate(lab.ypos = cumsum(prop) - 0.6*prop)
 
 
-ggplot(score_df1, aes(x = 2, y = prop, fill = Scores)) +
+sentiment_graph <- ggplot(score_df1, aes(x = 2, y = prop, fill = Scores)) +
   geom_bar(stat = "identity", color = "white") +
   coord_polar(theta = "y", start = 0)+
   geom_text(aes(y = lab.ypos, label = paste0(round(prop), "%")), color = "white")+
@@ -310,6 +314,16 @@ ggplot(score_df1, aes(x = 2, y = prop, fill = Scores)) +
   theme_void()+ggtitle("Sentiments Scores Proportions")+theme(plot.title = element_text(hjust=0.5,size = 22),axis.text.y = element_blank(), axis.ticks = element_blank(),
                                                               legend.title=element_text(size=14))+ labs(color='Item Type')+
   scale_fill_manual(values=c("darkred","orange","darkgreen"))+ guides(fill=guide_legend(title="Score"))
+
+
+png("C:/Users/johnl/OneDrive/Documents/GIt Projects/Text_Mining/GRaphs/Sentiments_scores.png")
+print(sentiment_graph)
+dev.off() 
+
+
+png("C:/Users/johnl/OneDrive/Documents/GIt Projects/Text_Mining/GRaphs/Sentiments_scores_distributions.png")
+print(Sentiments_scores_distributions)
+dev.off() 
 
 
 #The two pie charts display same results regardless  of the methods used(sentiment or sentiment_by)
