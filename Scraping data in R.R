@@ -1,14 +1,16 @@
 #Load required libraries
 rm(list = ls())
 
-lib_vec <- c("rvest","xml2", "stringr", "tm", "wordcloud", "wordcloud2", "ggplot2", "tidytext", "dplyr", "textdata", "sentimentr", "plotly")
 
-for(lib in lib_vec){
-  if(!require(lib, character.only = T)){
-    install.packages(lib)
+suppressPackageStartupMessages({
+  libs = c("rvest","xml2", "stringr", "tm", "wordcloud", "wordcloud2", "ggplot2", "tidytext", "dplyr", "textdata", "sentimentr", "plotly")
+  for(ilib in libs){
+    if(!ilib%in%installed.packages()){
+      install.packages(ilib, repos = "http://cran.us.r-project.org")
+    }
+    library(ilib, character.only = T)
   }
-  library(lib, character.only = T)
-}
+})
 
 
 web_url <- "https://pmg.org.za/hansards/"
