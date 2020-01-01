@@ -3,7 +3,7 @@ rm(list = ls())
 
 
 suppressPackageStartupMessages({
-  libs = c("rvest","xml2", "stringr", "tm", "wordcloud", "wordcloud2", "ggplot2", "tidytext", "dplyr", "textdata", "sentimentr", "plotly")
+  libs = c("rvest","xml2", "stringr", "tm", "wordcloud", "wordcloud2", "ggplot2", "tidytext", "dplyr", "textdata", "sentimentr", "plotly", "textstem")
   for(ilib in libs){
     if(!ilib%in%installed.packages()){
       install.packages(ilib, repos = "http://cran.us.r-project.org")
@@ -99,6 +99,7 @@ for(ival in 1:nrow(dates_links_df)){
 appended_minutes1 <- appended_minutes[!str_detect(appended_minutes, pattern = "<p>\\s</p>|<p>____</p>|file:///|https://www|<p><em>No summary available|<p><strong>Page: 1</strong></p>|<p><strong>Page|<p><strong>UNREVISED HANSARD|<p>(Draft Resolution)</p>|[0-9]|<p><em>English|<p><em>Setswana</em>|<p>\\(Draft Resolution|<p><em>IsiXhosa</em>|<p><em>Declaration\\(s")]
 
 appended_minutes1 <-str_to_sentence(str_replace_all(appended_minutes1, pattern = "<.*?>|\\.|,|\\?", replacement = ""))
+appended_minutes1 <- lemmatize_strings(appended_minutes1)
 
 #appended_minutes_df <- data.frame(appended_minutes1 = appended_minutes1)
 #appended_minutes2 <- apply(appended_minutes_df, MARGIN = 2, FUN = paste, sep=" ")
@@ -132,7 +133,7 @@ View(text_df)
 text_df_clean_st <- text_df
 text_df_clean <- text_df[!str_detect(text_df_clean_st$word, pattern = "the|can|will|are|'s"), ]
 
-text_df_clean$word <- as.character(text_df_clean$word)
+text_df_clean$word <- str_to_sentence(as.character(text_df_clean$word))
 
 
 text_df_clean <- text_df_clean%>% group_by(word)%>%summarise(freq = sum(freq))%>%arrange(desc(freq))
@@ -163,7 +164,7 @@ ggplot(text_df_clean[text_df_clean$freq>word_freq, ], aes(x = reorder(word, -fre
   geom_bar(stat="identity", show.legend = FALSE) +
   coord_flip() +
   labs(title = "Words with Frequency Greater Than 1000", x = "Words", y = "Word Frequency") +
-  geom_label(aes(fill = word),colour = "white", fontface = "bold", show.legend = FALSE)+theme_classic()+theme(plot.title = element_text(hjust=0.5,size = 22))+scale_fill_manual(values = rep(c("blue"),39))
+  geom_label(aes(fill = word),colour = "white", fontface = "bold", show.legend = FALSE)+theme_classic()+theme(plot.title = element_text(hjust=0.5,size = 22))+scale_fill_manual(values = rep(c("blue"),50))
 
 
 #Analyse Emotions
@@ -217,7 +218,19 @@ ggplot(sent_df, aes(x = 2, y = prop, fill = sentiment)) +
 
 sentiments <- sentiment(appended_minutes1)#Sentiments per sentences. It may results to duplicate sentences in case of  multiple sentences
 
-###################### I Have not done lametization as part of data preparation. I find stemming not useful in situations where complexity is involved e.g speak and spoke 
+
+appended_minutes1 <- str_replace_all(appended_minutes1, pattern = "havent|haven't|haven't", "have not")
+appended_minutes1 <- str_replace_all(appended_minutes1, pattern = "hasnt|hasn't|hasn't", "has not")
+appended_minutes1 <- str_replace_all(appended_minutes1, pattern = "cannt|can't|can't", "cannot")
+appended_minutes1 <- str_replace_all(appended_minutes1, pattern = "couldnt|couldn't|couldn't", "could not")
+appended_minutes1 <- str_replace_all(appended_minutes1, pattern = "arent|aren't", "are not")
+appended_minutes1 <- str_replace_all(appended_minutes1, pattern = "isnt|isn't|isn't", "is not")
+appended_minutes1 <- str_replace_all(appended_minutes1, pattern = "wouldnt|wouldn't|wouldn't", "Would not")
+appended_minutes1 <- str_replace_all(appended_minutes1, pattern = "werent|weren't|weren't", "were not")
+appended_minutes1 <- str_replace_all(appended_minutes1, pattern = "the're|they're", "they are")
+appended_minutes1 <- str_replace_all(appended_minutes1, pattern = "doesnt|doesn't", "does not")
+appended_minutes1 <- str_replace_all(appended_minutes1, pattern = "dont|don't|don’t", "do not")
+appended_minutes1 <- str_replace_all(appended_minutes1, pattern = "you’re|you’re", "you are")
 
 #Extract zero sentiments
 
@@ -318,12 +331,12 @@ sentiment_graph <- ggplot(score_df1, aes(x = 2, y = prop, fill = Scores)) +
   scale_fill_manual(values=c("darkred","orange","darkgreen"))+ guides(fill=guide_legend(title="Score"))
 
 
-png("C:/Users/johnl/OneDrive/Documents/GIt Projects/Text_Mining/GRaphs/Sentiments_scores.png")
+png("C:/Users/johnl/OneDrive/Documents/GIt Projects/Scraping data on the Web/Graphs/Sentiments_scores.png")
 print(sentiment_graph)
 dev.off() 
 
 
-png("C:/Users/johnl/OneDrive/Documents/GIt Projects/Text_Mining/GRaphs/Sentiments_scores_distributions.png")
+png("C:/Users/johnl/OneDrive/Documents/GIt Projects/Scraping data on the Web/Graphs/Sentiments_scores_distributions.png")
 print(Sentiments_scores_distributions)
 dev.off() 
 
