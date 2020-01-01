@@ -328,7 +328,7 @@ sentiment_graph <- ggplot(score_df1, aes(x = 2, y = prop, fill = Scores)) +
   #scale_fill_manual(values = mycols) +
   theme_void()+ggtitle("Sentiments Scores Proportions")+theme(plot.title = element_text(hjust=0.5,size = 22),axis.text.y = element_blank(), axis.ticks = element_blank(),
                                                               legend.title=element_text(size=14))+ labs(color='Item Type')+
-  scale_fill_manual(values=c("darkred","orange","darkgreen"))+ guides(fill=guide_legend(title="Score"))
+  scale_fill_manual(values=c("darkred","#635147","darkgreen"))+ guides(fill=guide_legend(title="Score"))
 
 
 png("C:/Users/johnl/OneDrive/Documents/GIt Projects/Scraping data on the Web/Graphs/Sentiments_scores.png")
